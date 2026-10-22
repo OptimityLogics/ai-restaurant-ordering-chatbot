@@ -1,106 +1,116 @@
 # AI WhatsApp Restaurant Ordering Assistant
 
-An AI-powered restaurant ordering assistant built with n8n, Google Gemini, WhatsApp, and Google Sheets.
+An n8n-based conversational workflow that helps restaurants answer customer questions, check menu availability, and record confirmed orders through WhatsApp.
 
-## 1. Overview
+## Overview
 
-Restaurants often handle menu inquiries, stock checks, customer questions, and order recording manually. This workflow automates these interactions through WhatsApp.
+The assistant combines Google Gemini with Google Sheets and WhatsApp to support a simple restaurant ordering journey. It can retrieve menu and stock information, answer frequently asked questions, guide customers through item selection, validate requested quantities against available stock, and record an order after customer confirmation.
 
-The assistant retrieves live menu and stock information from Google Sheets, answers restaurant FAQs, guides customers through item selection, checks requested quantities, and saves orders after customer confirmation.
+> This repository contains a sanitized workflow export for learning and demonstration. It is not a hosted service, and it does not include your credentials or live restaurant data.
 
-## 2. Demo Video
+## Demo
 
-[Watch the AI Restaurant Ordering Chatbot Demo](https://youtu.be/spvmwXP_Aj8?si=wyAeSSaCxCJMbAGc)
+[Watch the workflow demonstration](https://youtu.be/spvmwXP_Aj8?si=wyAeSSaCxCJMbAGc)
 
-## 3. Tech Stack and Tools Used
+## Architecture
 
-- **n8n:** Workflow automation and orchestration
-- **Google Gemini:** AI-powered conversation and request processing
-- **WhatsApp:** Customer messaging
-- **Google Sheets:** Inventory, FAQ, and order storage
-- **Simple Memory:** Recent conversation context for each customer
+```mermaid
+flowchart TD
+    A[Customer message in WhatsApp] --> B[WhatsApp Trigger]
+    B --> C[AI Agent + Google Gemini]
+    C <--> D[Simple Memory]
+    C <--> E[Google Sheets: Inventory]
+    C <--> F[Google Sheets: FAQ]
+    C <--> G[Google Sheets: Orders]
+    C --> H[Reply through WhatsApp]
+    G --> I[Order recorded after confirmation]
+```
 
-## 4. Prerequisites
+## Technology stack
+
+| Component | Purpose |
+|---|---|
+| n8n | Workflow orchestration and integrations |
+| Google Gemini | Conversational understanding and response generation |
+| WhatsApp Business Platform | Customer messaging and trigger events |
+| Google Sheets | Inventory, FAQ, and order records |
+| Simple Memory | Short-term conversation context |
+| GitHub Actions | Automated workflow-file validation on pushes and pull requests |
+
+## Repository contents
+
+- `workflow.json` — sanitized n8n workflow export to import into your n8n instance.
+- `tests/test_workflow.py` — lightweight structural and security-hygiene checks for the exported workflow.
+- `.github/workflows/validate-workflow.yml` — CI workflow that runs the checks on pushes and pull requests.
+
+## Requirements
 
 - An n8n instance with compatible AI Agent, Google Gemini, Google Sheets, and WhatsApp nodes.
-- A Google account with access to a spreadsheet.
-- Google Gemini API access and credentials.
-- WhatsApp Business Platform access and the required API credentials.
-- A configured WhatsApp webhook and phone number ID.
-- A Google Sheet containing `Inventory`, `FAQ`, and `Orders` tabs.
+- Google Gemini API access.
+- WhatsApp Business Platform access and a configured WhatsApp trigger/phone number.
+- A Google spreadsheet with `Inventory`, `FAQ`, and `Orders` tabs.
 
-## 5. Setup Instructions
+## Google Sheets structure
+
+Use a spreadsheet that matches the fields expected by your workflow. A suggested starting structure is:
+
+| Tab | Example columns |
+|---|---|
+| `Inventory` | Food Item, Quantity, Status |
+| `FAQ` | Question, Answer |
+| `Orders` | Customer Name, Food Item, Quantity Ordered, Order Date, Status |
+
+Check the Google Sheets nodes in n8n and align each tab and column with the actual workflow configuration before activating it.
+
+## Setup
 
 1. Download `workflow.json` from this repository.
-2. Open your n8n instance and navigate to Workflows.
-3. Select **Import from File** and choose `workflow.json`.
-4. Review the imported nodes and connections.
-5. Configure Google Gemini, Google Sheets, and WhatsApp credentials.
-6. Update the spreadsheet references and WhatsApp settings for your environment.
-7. Configure and activate the WhatsApp trigger, then test the workflow.
+2. In n8n, open **Workflows** and choose **Import from File**.
+3. Select `workflow.json` and review the imported nodes and connections.
+4. Add your own Google Gemini, Google Sheets, and WhatsApp credentials in n8n.
+5. Replace spreadsheet and WhatsApp placeholders with values from your own environment.
+6. Confirm the spreadsheet tabs and columns match the workflow configuration.
+7. Test with sample menu questions and order conversations before activating the WhatsApp trigger for real users.
+8. Review n8n execution logs and verify that only confirmed orders are recorded as expected.
 
-## 6. Configuration Details
+### Configuration and security
 
-**Google Gemini**
-- Configure valid API credentials for the primary and fallback model nodes.
-- Verify the selected models and fallback configuration.
+The export is sanitized and uses placeholders for environment-specific settings. Credentials must be added inside your own n8n instance after importing.
 
-**WhatsApp**
-- Configure the WhatsApp Trigger and message-sending node.
-- Set the correct phone number ID, credentials, and webhook settings.
+- Never commit API keys, access tokens, passwords, webhook secrets, or private customer data.
+- Limit access to the workflow and connected spreadsheet to authorized users.
+- Test with non-production data first.
+- Verify the order-confirmation step and inventory handling before using this workflow in a live restaurant.
 
-**Google Sheets**
+## Example conversation
 
-Create a spreadsheet with these tabs and columns:
+**Customer:** `Show me the available menu.`
 
-| Tab | Required columns |
-|---|---|
-| Inventory | Food Item, Quantity, Status |
-| FAQ | Question, Answer |
-| Orders | Customer Name, Food Item, Quantity Ordered, Order Date, Status |
+**Expected behavior:** The assistant checks the configured inventory data and presents available options based on the connected spreadsheet.
 
-Update the spreadsheet reference in the inventory, FAQ, and order nodes. The sanitized workflow uses `YOUR_GOOGLE_SHEETS_SPREADSHEET_ID` and `YOUR_WHATSAPP_PHONE_NUMBER_ID` as placeholders. Select the corresponding tabs in your own spreadsheet and configure credentials after importing.
+**Customer:** `I want 2 of [available food item].`
 
-Never commit API keys, access tokens, passwords, or other secrets.
+**Expected behavior:** The assistant checks availability, continues the order conversation, presents a summary, and asks for confirmation before recording the order.
 
-## 7. How to Run the Workflow
+Actual items, stock levels, and responses depend on the Google Sheets data and the configured model.
 
-1. Import the workflow into n8n.
-2. Configure the required credentials and Google Sheets references.
-3. Verify that the inventory and FAQ tabs contain the required data.
-4. Configure the WhatsApp integration and activate the trigger.
-5. Send a text message to the connected WhatsApp number.
-6. Test menu browsing, availability checks, FAQ responses, and order confirmation.
-7. Review workflow executions and confirm that successfully placed orders appear in the Orders sheet.
+## Validation and CI
 
-## 8. Sample Input and Output
+The repository includes automated checks for JSON validity, expected workflow structure, node connections, and common secret-like values. GitHub Actions runs these checks when changes are pushed or a pull request is opened against the repository.
 
-**Sample customer input**
+These checks validate the exported file; they do **not** execute the workflow against live WhatsApp, Gemini, or Google Sheets services. Integration testing must be performed in a configured n8n environment.
 
-`Show me the available menu.`
+## Deployment
 
-**Expected assistant behavior**
+This project is an n8n workflow rather than a conventional website, so a website-style auto-deployment pipeline is not applicable by default. The validated JSON can be imported manually into n8n. Automated deployment can be added later if an n8n instance and a securely managed API credential are available; secrets should be stored in GitHub Actions Secrets and never in the repository.
 
-The assistant retrieves the current inventory, filters available items, groups them into numbered categories, and asks the customer to select a category.
+## Limitations
 
-**Sample ordering interaction**
+- Requires external accounts, credentials, and a configured Google spreadsheet.
+- Conversation quality depends on model configuration and the prompt in the workflow.
+- The repository's CI checks do not replace end-to-end tests in n8n.
+- Inventory consistency and duplicate-order prevention should be verified for the target restaurant before production use.
 
-`I want 2 of [available food item].`
+## License
 
-The assistant checks current stock, validates the requested quantity, and continues the order conversation. Before saving, it displays the complete order summary and requests confirmation. After a successful save, it confirms that the order has been recorded.
-
-Actual menu items and availability depend on the connected Google Sheets data.
-
-## 9. Documentation
-
-See [AI WhatsApp Restaurant Ordering Assistant Documentation](AI-WhatsApp-Restaurant-Ordering-Assistant-Documentation.docx) for the business problem, workflow nodes, customer ordering journey, Google Sheets structure, safeguards, limitations, and potential improvements.
-
-## 10. Workflow File
-
-`workflow.json` contains the sanitized n8n workflow export. Credentials, spreadsheet references, and WhatsApp settings must be configured for your own environment before execution.
-
-## 11. Footer
-
-Built by Optimity Logics
-
-#OptimityLogics
+No license is currently specified. Contact the repository owner before reusing this project beyond personal evaluation or learning.
