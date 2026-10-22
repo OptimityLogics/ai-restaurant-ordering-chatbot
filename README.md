@@ -12,20 +12,6 @@ The assistant combines Google Gemini with Google Sheets and WhatsApp to support 
 
 [Watch the workflow demonstration](https://youtu.be/spvmwXP_Aj8?si=wyAeSSaCxCJMbAGc)
 
-## Architecture
-
-```mermaid
-flowchart TD
-    A[Customer message in WhatsApp] --> B[WhatsApp Trigger]
-    B --> C[AI Agent + Google Gemini]
-    C <--> D[Simple Memory]
-    C <--> E[Google Sheets: Inventory]
-    C <--> F[Google Sheets: FAQ]
-    C <--> G[Google Sheets: Orders]
-    C --> H[Reply through WhatsApp]
-    G --> I[Order recorded after confirmation]
-```
-
 ## Technology stack
 
 | Component | Purpose |
