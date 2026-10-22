@@ -1,0 +1,35 @@
+name: Validate n8n workflow
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "workflow.json"
+      - "tests/**"
+      - ".github/workflows/validate-workflow.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "workflow.json"
+      - "tests/**"
+      - ".github/workflows/validate-workflow.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate workflow export
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate workflow structure and security hygiene
+        run: python -m unittest discover -s tests -v
