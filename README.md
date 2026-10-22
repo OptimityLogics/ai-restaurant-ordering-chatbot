@@ -114,3 +114,7 @@ This project is an n8n workflow rather than a conventional website, so a website
 ## License
 
 No license is currently specified. Contact the repository owner before reusing this project beyond personal evaluation or learning.
+
+---
+
+**Built by [Optimity Logics](https://optimitylogics.com).**
